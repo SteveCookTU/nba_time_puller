@@ -14,18 +14,15 @@ fn app(cx: Scope) -> Element {
     let loading = use_state(&cx, || false);
     let timezone = use_state(&cx, || Timezone::EDT);
 
-    let text_routine = use_coroutine(
-        &cx,
-        |mut rx: UnboundedReceiver<(String, Timezone)>| {
-            to_owned![table_rows, loading];
-            async move {
-                while let Some((date, timezone)) = rx.next().await {
-                    table_rows.set(Some(get_nba_times(&date, timezone).await));
-                    loading.set(false);
-                }
+    let text_routine = use_coroutine(&cx, |mut rx: UnboundedReceiver<(String, Timezone)>| {
+        to_owned![table_rows, loading];
+        async move {
+            while let Some((date, timezone)) = rx.next().await {
+                table_rows.set(Some(get_nba_times(&date, timezone).await));
+                loading.set(false);
             }
-        },
-    );
+        }
+    });
 
     let table = if let Some(rows) = table_rows.get() {
         let rows = rows.iter().map(|row| {
@@ -82,7 +79,7 @@ fn app(cx: Scope) -> Element {
         }
     };
 
-    cx.render(rsx!{
+    cx.render(rsx! {
         button {
             style: "margin-right: 5px;",
             onclick: move |_| {

@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct Scoreboard {
-    pub games: Vec<Game>
+    pub games: Vec<Game>,
 }
 
 #[derive(Deserialize)]

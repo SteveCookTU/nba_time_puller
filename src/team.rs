@@ -1,5 +1,5 @@
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::fmt::{Display, Formatter};
-use num_enum::{TryFromPrimitive, IntoPrimitive};
 
 #[derive(PartialEq, Copy, Clone, TryFromPrimitive, IntoPrimitive)]
 #[repr(u32)]
@@ -72,7 +72,7 @@ impl Display for Team {
             Team::UtahJazz => write!(f, "Utah Jazz"),
             Team::WashingtonWizards => write!(f, "Washington Wizards"),
             Team::Unknown => write!(f, "Unknown"),
-            Team::All => write!(f, "All")
+            Team::All => write!(f, "All"),
         }
     }
 }
