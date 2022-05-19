@@ -1,6 +1,40 @@
 use num_enum::{IntoPrimitive, TryFromPrimitive};
 use std::fmt::{Display, Formatter};
 
+pub const TEAMS: [Team; 31] = [
+    Team::All,
+    Team::AtlantaHawks,
+    Team::BostonCeltics,
+    Team::BrooklynNets,
+    Team::CharlotteHornets,
+    Team::ChicagoBulls,
+    Team::ClevelandCavaliers,
+    Team::DallasMavericks,
+    Team::DenverNuggets,
+    Team::DetroitPistons,
+    Team::GoldenStateWarriors,
+    Team::HoustonRockets,
+    Team::IndianaPacers,
+    Team::LAClippers,
+    Team::LosAngelesLakers,
+    Team::MemphisGrizzlies,
+    Team::MiamiHeat,
+    Team::MilwaukeeBucks,
+    Team::MinnesotaTimberwolves,
+    Team::NewOrleansPelicans,
+    Team::NewYorkKnicks,
+    Team::OklahomaCityThunder,
+    Team::OrlandoMagic,
+    Team::Philadelphia76ers,
+    Team::PhoenixSuns,
+    Team::PortlandTrailBlazers,
+    Team::SacramentoKings,
+    Team::SanAntoniaSpurs,
+    Team::TorontoRaptors,
+    Team::UtahJazz,
+    Team::WashingtonWizards,
+];
+
 #[derive(PartialEq, Copy, Clone, TryFromPrimitive, IntoPrimitive)]
 #[repr(u32)]
 pub enum Team {

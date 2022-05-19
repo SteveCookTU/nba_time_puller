@@ -2,6 +2,7 @@ use dioxus::core::to_owned;
 use dioxus::prelude::*;
 use futures::StreamExt;
 use nba_time_puller::get_nba_times;
+use nba_time_puller::team::{Team, TEAMS};
 use nba_time_puller::timezone::Timezone;
 
 fn main() {
@@ -13,24 +14,30 @@ fn app(cx: Scope) -> Element {
     let date = use_state(&cx, || "2022-05-19".to_string());
     let loading = use_state(&cx, || false);
     let timezone = use_state(&cx, || Timezone::EDT);
+    let team = use_state(&cx, || Team::All);
 
-    let text_routine = use_coroutine(&cx, |mut rx: UnboundedReceiver<(String, Timezone)>| {
-        to_owned![table_rows, loading];
-        async move {
-            while let Some((date, timezone)) = rx.next().await {
-                table_rows.set(Some(get_nba_times(&date, timezone).await));
-                loading.set(false);
+    let text_routine = use_coroutine(
+        &cx,
+        |mut rx: UnboundedReceiver<(String, Timezone, Team)>| {
+            to_owned![table_rows, loading];
+            async move {
+                while let Some((date, timezone, team)) = rx.next().await {
+                    table_rows.set(Some(get_nba_times(&date, timezone, team).await));
+                    loading.set(false);
+                }
             }
-        }
-    });
+        },
+    );
 
     let table = if let Some(rows) = table_rows.get() {
         let rows = rows.iter().map(|row| {
             let mut row = row.split(',');
             let title = row.next().unwrap();
             let date = row.next().unwrap();
+            let duration = row.next().unwrap();
             let start = row.next().unwrap();
             let end = row.next().unwrap();
+            let broadcasts = row.next().unwrap().replace('.', ",");
             rsx! {
                 tr {
                     td {
@@ -42,11 +49,19 @@ fn app(cx: Scope) -> Element {
                     }
                     td {
                         class: "center",
+                        "{duration}"
+                    }
+                    td {
+                        class: "center",
                         "{start}"
                     }
                     td {
                         class: "center",
                         "{end}"
+                    }
+                    td {
+                        class: "center",
+                        "{broadcasts}"
                     }
                 }
             }
@@ -62,10 +77,16 @@ fn app(cx: Scope) -> Element {
                         "Date"
                     }
                     th {
+                        "Duration"
+                    }
+                    th {
                         "Converted Start Time"
                     }
                     th {
                         "Converted End Time"
+                    }
+                    th {
+                        "Broadcasts"
                     }
                 }
                 rows
@@ -84,7 +105,7 @@ fn app(cx: Scope) -> Element {
             style: "margin-right: 5px;",
             onclick: move |_| {
                 loading.set(true);
-                text_routine.send((date.get().to_string(), *timezone.get()))
+                text_routine.send((date.get().to_string(), *timezone.get(), *team.get()))
             },
             disabled: "{loading}",
             "Load Data"
@@ -119,6 +140,25 @@ fn app(cx: Scope) -> Element {
                     value: "-7",
                     "PDT"
                 }
+            }
+        }
+        p {
+            "Team:",
+            select {
+                style: "margin-left: 5px;",
+                onchange: move |evt| {
+                    let i = evt.value.parse::<u32>().unwrap();
+                    team.set(Team::try_from(i).unwrap());
+                },
+                TEAMS.iter().map(|&team| {
+                    let value: u32 = team.into();
+                    rsx!(
+                        option {
+                            value: "{value}",
+                            "{team}"
+                        }
+                    )
+                })
             }
         }
         table
